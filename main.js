@@ -677,20 +677,23 @@ class Game {
         const targetNum = this.currentTurn === 1 ? 2 : 1;
         const target = this.players[targetNum];
 
-        // 計算傷害（三區域判定：中間30、中間兩側15、外面兩側10）
-        const innerZone = CONFIG.HIT_RADIUS / 3;      // 中間區域
-        const middleZone = CONFIG.HIT_RADIUS * 2 / 3; // 中間兩側區域
+        // 計算傷害（垂直三區域判定：由左至右 外側-內側-中心-內側-外側）
+        // 使用水平距離（X軸差距）判定區域
+        const horizontalDist = Math.abs(this.projectile.x - target.x);
+        const characterWidth = CONFIG.CHARACTER_SIZE / 2;
+        const centerZone = characterWidth / 3;      // 中心區域寬度
+        const innerZone = characterWidth * 2 / 3;   // 內側區域邊界
 
         let damage;
         let hitZone;
-        if (distance < innerZone) {
-            damage = CONFIG.DAMAGE_CENTER;  // 中間擊中
+        if (horizontalDist < centerZone) {
+            damage = CONFIG.DAMAGE_CENTER;  // 中心擊中（角色中線）
             hitZone = '中心';
-        } else if (distance < middleZone) {
-            damage = CONFIG.DAMAGE_INNER;   // 中間兩側
+        } else if (horizontalDist < innerZone) {
+            damage = CONFIG.DAMAGE_INNER;   // 內側
             hitZone = '內側';
         } else {
-            damage = CONFIG.DAMAGE_OUTER;   // 外面兩側
+            damage = CONFIG.DAMAGE_OUTER;   // 外側
             hitZone = '外側';
         }
 
