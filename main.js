@@ -12,6 +12,7 @@ const ASSETS = {
         idle: 'assets/cat/idle.png',           // 貓咪站立
         attack: 'assets/cat/attack.png',       // 貓咪攻擊
         hurt: 'assets/cat/hurt.png',           // 貓咪受傷
+        taunt: 'assets/cat/taunt.png',         // 貓咪嘲諷
         projectile: 'assets/cat/projectile.png' // 貓咪投擲物（魚）
     },
     // 狗狗陣營圖片（美式漫畫風格）
@@ -19,6 +20,7 @@ const ASSETS = {
         idle: 'assets/dog/idle.png',           // 狗狗站立
         attack: 'assets/dog/attack.png',       // 狗狗攻擊
         hurt: 'assets/dog/hurt.png',           // 狗狗受傷
+        taunt: 'assets/dog/taunt.png',         // 狗狗嘲諷
         projectile: 'assets/dog/projectile.png' // 狗狗投擲物（骨頭）
     },
     // 背景與場景
@@ -198,10 +200,12 @@ class Game {
         loadImage('cat_idle', ASSETS.cat.idle, '🐱');
         loadImage('cat_attack', ASSETS.cat.attack, '🐱');
         loadImage('cat_hurt', ASSETS.cat.hurt, '🐱');
+        loadImage('cat_taunt', ASSETS.cat.taunt, '😼');
         loadImage('cat_projectile', ASSETS.cat.projectile, '🐟');
         loadImage('dog_idle', ASSETS.dog.idle, '🐶');
         loadImage('dog_attack', ASSETS.dog.attack, '🐶');
         loadImage('dog_hurt', ASSETS.dog.hurt, '🐶');
+        loadImage('dog_taunt', ASSETS.dog.taunt, '🐕');
         loadImage('dog_projectile', ASSETS.dog.projectile, '🦴');
         loadImage('shield', ASSETS.shield, '🛡️');
         loadImage('explosion', ASSETS.explosion, '💥');
@@ -1024,7 +1028,9 @@ class Game {
         let imgState = 'idle';
         if (player.animation === 'hurt') {
             imgState = 'hurt';
-        } else if (player.animation === 'taunt' || this.state === GameState.ATTACK && this.currentTurn === playerNum) {
+        } else if (player.animation === 'taunt') {
+            imgState = 'taunt';
+        } else if (this.state === GameState.ATTACK && this.currentTurn === playerNum) {
             imgState = 'attack';
         }
 
