@@ -5,29 +5,28 @@
  */
 
 // ==================== 資源管理 ====================
-// 所有圖片資源集中於此，方便後續抽換
+// 所有圖片資源集中於此，使用本地美式漫畫風格素材
 const ASSETS = {
-    // 貓咪陣營圖片（可替換為自訂圖片）
-    // 使用 emoji 作為備用方案，以 data URI 或外部圖片為主
+    // 貓咪陣營圖片（美式漫畫風格）
     cat: {
-        idle: 'https://em-content.zobj.net/source/twitter/376/cat-face_1f431.png',       // 貓咪站立
-        attack: 'https://em-content.zobj.net/source/twitter/376/cat-face_1f431.png',     // 貓咪攻擊
-        hurt: 'https://em-content.zobj.net/source/twitter/376/cat-face_1f431.png',       // 貓咪受傷
-        projectile: 'https://em-content.zobj.net/source/twitter/376/fish_1f41f.png'      // 貓咪投擲物（魚）
+        idle: 'assets/cat/idle.png',           // 貓咪站立
+        attack: 'assets/cat/attack.png',       // 貓咪攻擊
+        hurt: 'assets/cat/hurt.png',           // 貓咪受傷
+        projectile: 'assets/cat/projectile.png' // 貓咪投擲物（魚）
     },
-    // 狗狗陣營圖片（可替換為自訂圖片）
+    // 狗狗陣營圖片（美式漫畫風格）
     dog: {
-        idle: 'https://em-content.zobj.net/source/twitter/376/dog-face_1f436.png',       // 狗狗站立
-        attack: 'https://em-content.zobj.net/source/twitter/376/dog-face_1f436.png',     // 狗狗攻擊
-        hurt: 'https://em-content.zobj.net/source/twitter/376/dog-face_1f436.png',       // 狗狗受傷
-        projectile: 'https://em-content.zobj.net/source/twitter/376/bone_1f9b4.png'      // 狗狗投擲物（骨頭）
+        idle: 'assets/dog/idle.png',           // 狗狗站立
+        attack: 'assets/dog/attack.png',       // 狗狗攻擊
+        hurt: 'assets/dog/hurt.png',           // 狗狗受傷
+        projectile: 'assets/dog/projectile.png' // 狗狗投擲物（骨頭）
     },
     // 背景與場景
     background: 'https://picsum.photos/1920/1080?blur=2',  // 遊戲背景（模糊風景）
     ground: '#3d5a3d',  // 地面顏色
     // 特效
-    explosion: 'https://em-content.zobj.net/source/twitter/376/collision_1f4a5.png',     // 爆炸效果
-    shield: 'https://em-content.zobj.net/source/twitter/376/shield_1f6e1-fe0f.png'       // 護盾效果
+    explosion: 'assets/effects/explosion.png',  // 爆炸效果
+    shield: 'assets/effects/shield.png'         // 護盾效果
 };
 
 // ==================== 遊戲設定常數 ====================
@@ -197,8 +196,12 @@ class Game {
         };
 
         loadImage('cat_idle', ASSETS.cat.idle, '🐱');
+        loadImage('cat_attack', ASSETS.cat.attack, '🐱');
+        loadImage('cat_hurt', ASSETS.cat.hurt, '🐱');
         loadImage('cat_projectile', ASSETS.cat.projectile, '🐟');
         loadImage('dog_idle', ASSETS.dog.idle, '🐶');
+        loadImage('dog_attack', ASSETS.dog.attack, '🐶');
+        loadImage('dog_hurt', ASSETS.dog.hurt, '🐶');
         loadImage('dog_projectile', ASSETS.dog.projectile, '🦴');
         loadImage('shield', ASSETS.shield, '🛡️');
         loadImage('explosion', ASSETS.explosion, '💥');
@@ -1017,7 +1020,15 @@ class Game {
 
         if (!player.team) return;
 
-        const imgKey = `${player.team}_idle`;
+        // 根據動畫狀態選擇不同圖片
+        let imgState = 'idle';
+        if (player.animation === 'hurt') {
+            imgState = 'hurt';
+        } else if (player.animation === 'taunt' || this.state === GameState.ATTACK && this.currentTurn === playerNum) {
+            imgState = 'attack';
+        }
+
+        const imgKey = `${player.team}_${imgState}`;
         const img = this.images[imgKey];
         const size = CONFIG.CHARACTER_SIZE;
 
