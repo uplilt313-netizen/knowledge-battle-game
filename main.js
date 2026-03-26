@@ -23,9 +23,9 @@ const ASSETS = {
         taunt: 'assets/dog/taunt.png',         // 狗狗嘲諷
         projectile: 'assets/dog/projectile.png' // 狗狗投擲物（骨頭）
     },
-    // 背景與場景
-    background: 'https://picsum.photos/1920/1080?blur=2',  // 遊戲背景（模糊風景）
-    ground: '#3d5a3d',  // 地面顏色
+    // 背景與場景（美式漫畫風格）
+    background: 'assets/background.png',  // 遊戲背景
+    ground: '#4a7c4a',  // 地面顏色（配合背景草地）
     // 特效
     explosion: 'assets/effects/explosion.png',  // 爆炸效果
     shield: 'assets/effects/shield.png'         // 護盾效果
@@ -199,6 +199,7 @@ class Game {
             this.images[key].fallbackEmoji = fallbackEmoji;
         };
 
+        loadImage('background', ASSETS.background, null);
         loadImage('cat_idle', ASSETS.cat.idle, '🐱');
         loadImage('cat_attack', ASSETS.cat.attack, '🐱');
         loadImage('cat_hurt', ASSETS.cat.hurt, '🐱');
@@ -942,17 +943,24 @@ class Game {
         // 清除畫面
         ctx.clearRect(0, 0, w, h);
 
-        // 繪製背景漸層
-        const gradient = ctx.createLinearGradient(0, 0, 0, h);
-        gradient.addColorStop(0, '#87CEEB');   // 天空藍
-        gradient.addColorStop(0.6, '#98D8C8'); // 淺綠
-        gradient.addColorStop(1, '#3d5a3d');   // 地面綠
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, w, h);
+        // 繪製背景圖片
+        const bgImg = this.images['background'];
+        if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+            // 繪製背景圖片，覆蓋整個畫布
+            ctx.drawImage(bgImg, 0, 0, w, h);
+        } else {
+            // 備用：繪製漸層背景
+            const gradient = ctx.createLinearGradient(0, 0, 0, h);
+            gradient.addColorStop(0, '#87CEEB');   // 天空藍
+            gradient.addColorStop(0.6, '#98D8C8'); // 淺綠
+            gradient.addColorStop(1, '#3d5a3d');   // 地面綠
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, w, h);
+        }
 
-        // 繪製地面
+        // 繪製地面（半透明，與背景融合）
         const groundY = h - 100;
-        ctx.fillStyle = '#2d4a2d';
+        ctx.fillStyle = 'rgba(45, 74, 45, 0.7)';
         ctx.fillRect(0, groundY, w, 100);
 
         // 繪製草地紋理
