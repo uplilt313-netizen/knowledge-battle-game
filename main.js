@@ -38,8 +38,8 @@ const CONFIG = {
 
     // 物理參數
     GRAVITY: 0.4,              // 重力加速度（降低讓拋物線更遠）
-    MAX_POWER: 31.5,           // 最大發射力道（降低30%）
-    POWER_MULTIPLIER: 0.175,   // 拖拽距離轉力道係數（降低30%）
+    MAX_POWER: 15.75,          // 最大發射力道（再降低50%）
+    POWER_MULTIPLIER: 0.0875,  // 拖拽距離轉力道係數（再降低50%）
 
     // 傷害計算
     // 傷害設定（三區域判定）
@@ -64,7 +64,7 @@ const CONFIG = {
     },
 
     // 動畫
-    PROJECTILE_SIZE: 40,       // 投擲物大小
+    PROJECTILE_SIZE: 80,       // 投擲物大小（放大200%）
     CHARACTER_SIZE: 187,       // 角色大小（再放大30%）
     TRAJECTORY_DOTS: 25        // 軌跡預測點數（增加以顯示更長軌跡）
 };
