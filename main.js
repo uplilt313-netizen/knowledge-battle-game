@@ -36,9 +36,9 @@ const CONFIG = {
     MAX_HP: 100,
 
     // 物理參數
-    GRAVITY: 0.5,              // 重力加速度
-    MAX_POWER: 25,             // 最大發射力道
-    POWER_MULTIPLIER: 0.15,   // 拖拽距離轉力道係數
+    GRAVITY: 0.4,              // 重力加速度（降低讓拋物線更遠）
+    MAX_POWER: 45,             // 最大發射力道（大幅提升）
+    POWER_MULTIPLIER: 0.25,    // 拖拽距離轉力道係數（提升拖拽靈敏度）
 
     // 傷害計算
     BASE_DAMAGE: 15,           // 基礎傷害
@@ -52,10 +52,18 @@ const CONFIG = {
         shield: { name: '護盾', blocksOne: true }
     },
 
+    // 中間圍牆設定
+    WALL: {
+        WIDTH: 40,             // 圍牆寬度
+        HEIGHT_RATIO: 0.45,    // 圍牆高度（相對於畫面高度的比例）
+        COLOR: '#8B4513',      // 圍牆顏色（棕色磚牆）
+        BORDER_COLOR: '#5D3A1A' // 圍牆邊框顏色
+    },
+
     // 動畫
     PROJECTILE_SIZE: 40,       // 投擲物大小
     CHARACTER_SIZE: 120,       // 角色大小
-    TRAJECTORY_DOTS: 15        // 軌跡預測點數
+    TRAJECTORY_DOTS: 25        // 軌跡預測點數（增加以顯示更長軌跡）
 };
 
 // ==================== 遊戲狀態 ====================
@@ -539,6 +547,12 @@ class Game {
         this.projectile.x += this.projectile.vx;
         this.projectile.y += this.projectile.vy;
 
+        // 檢查是否撞到圍牆
+        if (this.checkWallCollision()) {
+            this.handleWallHit();
+            return;
+        }
+
         // 檢查是否擊中對手
         const target = this.projectile.owner === 1 ? this.players[2] : this.players[1];
         const dist = Math.hypot(
@@ -558,6 +572,36 @@ class Game {
             this.projectile.x > this.canvas.width + 100) {
             this.handleMiss();
         }
+    }
+
+    // 檢查投擲物是否撞到圍牆
+    checkWallCollision() {
+        const wall = this.getWallBounds();
+        const p = this.projectile;
+        const size = CONFIG.PROJECTILE_SIZE / 2;
+
+        // 檢查投擲物邊界是否與圍牆重疊
+        return (
+            p.x + size > wall.x &&
+            p.x - size < wall.x + wall.width &&
+            p.y + size > wall.y &&
+            p.y - size < wall.y + wall.height
+        );
+    }
+
+    // 處理撞牆
+    handleWallHit() {
+        this.projectile.active = false;
+        this.state = GameState.HIT;
+
+        // 在撞牆位置顯示爆炸效果
+        this.addEffect(this.projectile.x, this.projectile.y, 'wall_hit');
+
+        document.getElementById('turn-indicator').textContent = '💥 撞到圍牆了！';
+
+        setTimeout(() => {
+            this.switchTurn();
+        }, 1200);
     }
 
     handleHit(distance) {
@@ -774,6 +818,9 @@ class Game {
             ctx.stroke();
         }
 
+        // 繪製中間圍牆
+        this.drawWall();
+
         // 繪製血條
         this.drawHealthBar(1);
         this.drawHealthBar(2);
@@ -951,21 +998,50 @@ class Game {
         let px = startX;
         let py = startY;
 
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        // 取得圍牆邊界
+        const wall = this.getWallBounds();
+        let hitWall = false;
+
         for (let i = 0; i < CONFIG.TRAJECTORY_DOTS; i++) {
             // 模擬物理
             vy += CONFIG.GRAVITY;
             px += vx;
             py += vy;
 
-            // 繪製點（越遠越透明）
+            // 檢查是否會撞牆
+            const size = CONFIG.PROJECTILE_SIZE / 2;
+            if (px + size > wall.x && px - size < wall.x + wall.width &&
+                py + size > wall.y && py - size < wall.y + wall.height) {
+                hitWall = true;
+            }
+
+            // 繪製點（越遠越透明，撞牆後變紅色）
             const alpha = 1 - (i / CONFIG.TRAJECTORY_DOTS);
             ctx.globalAlpha = alpha * 0.8;
-            ctx.beginPath();
-            ctx.arc(px, py, 5, 0, Math.PI * 2);
-            ctx.fill();
+
+            if (hitWall) {
+                ctx.fillStyle = 'rgba(255, 100, 100, 0.9)';
+                ctx.beginPath();
+                ctx.arc(px, py, 7, 0, Math.PI * 2);
+                ctx.fill();
+                // 撞牆後停止繪製
+                break;
+            } else {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.beginPath();
+                ctx.arc(px, py, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
         ctx.globalAlpha = 1;
+
+        // 如果會撞牆，顯示警告
+        if (hitWall) {
+            ctx.fillStyle = '#ff6b6b';
+            ctx.font = 'bold 16px Microsoft JhengHei';
+            ctx.textAlign = 'center';
+            ctx.fillText('⚠️ 會撞牆！', player.x, player.y - CONFIG.CHARACTER_SIZE - 45);
+        }
     }
 
     drawProjectile() {
@@ -995,6 +1071,69 @@ class Game {
         ctx.restore();
     }
 
+    // 取得圍牆邊界
+    getWallBounds() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const groundY = h - 100;
+        const wallWidth = CONFIG.WALL.WIDTH;
+        const wallHeight = groundY * CONFIG.WALL.HEIGHT_RATIO;
+
+        return {
+            x: (w - wallWidth) / 2,
+            y: groundY - wallHeight,
+            width: wallWidth,
+            height: wallHeight
+        };
+    }
+
+    // 繪製中間圍牆
+    drawWall() {
+        const ctx = this.ctx;
+        const wall = this.getWallBounds();
+
+        // 繪製磚牆效果
+        ctx.fillStyle = CONFIG.WALL.COLOR;
+        ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+
+        // 繪製磚塊紋理
+        ctx.strokeStyle = CONFIG.WALL.BORDER_COLOR;
+        ctx.lineWidth = 2;
+
+        const brickHeight = 20;
+        const brickWidth = wall.width;
+
+        for (let row = 0; row < wall.height / brickHeight; row++) {
+            const y = wall.y + row * brickHeight;
+
+            // 水平線
+            ctx.beginPath();
+            ctx.moveTo(wall.x, y);
+            ctx.lineTo(wall.x + wall.width, y);
+            ctx.stroke();
+
+            // 垂直線（交錯排列）
+            if (row % 2 === 0) {
+                ctx.beginPath();
+                ctx.moveTo(wall.x + wall.width / 2, y);
+                ctx.lineTo(wall.x + wall.width / 2, y + brickHeight);
+                ctx.stroke();
+            }
+        }
+
+        // 圍牆邊框
+        ctx.strokeStyle = '#3D2314';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+
+        // 圍牆頂部裝飾
+        ctx.fillStyle = '#654321';
+        ctx.fillRect(wall.x - 5, wall.y - 10, wall.width + 10, 15);
+        ctx.strokeStyle = '#3D2314';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(wall.x - 5, wall.y - 10, wall.width + 10, 15);
+    }
+
     drawEffects() {
         const ctx = this.ctx;
 
@@ -1017,6 +1156,17 @@ class Game {
                     ctx.textBaseline = 'middle';
                     ctx.fillText('💥', effect.x, effect.y);
                 }
+            } else if (effect.type === 'wall_hit') {
+                // 撞牆特效 - 磚塊碎片
+                ctx.font = `${size * 0.8}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🧱', effect.x, effect.y);
+                // 煙霧效果
+                ctx.fillStyle = `rgba(150, 150, 150, ${alpha * 0.5})`;
+                ctx.beginPath();
+                ctx.arc(effect.x, effect.y, size * 0.6, 0, Math.PI * 2);
+                ctx.fill();
             } else if (effect.type === 'shield') {
                 ctx.strokeStyle = '#64b5f6';
                 ctx.lineWidth = 5;
