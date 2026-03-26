@@ -894,7 +894,11 @@ class Game {
         this.projectile.active = false;
         this.effects = [];
         this.currentQuestionIndex = 0;
-        this.shuffleQuestions();
+
+        // 根據順序模式決定是否打亂題目
+        if (this.questionOrderMode === 'random') {
+            this.shuffleQuestions();
+        }
 
         // 關閉遊戲結束視窗
         document.getElementById('gameover-modal').classList.remove('active');
