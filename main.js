@@ -174,7 +174,8 @@ class Game {
 
     updatePlayerPositions() {
         // 玩家1 在左側，玩家2 在右側
-        const groundY = this.canvas.height - 100;
+        // 角色站在畫面底部（配合背景街道地面）
+        const groundY = this.canvas.height - 30;
         this.players[1].x = this.canvas.width * 0.15;
         this.players[1].y = groundY - CONFIG.CHARACTER_SIZE / 2;
         this.players[2].x = this.canvas.width * 0.85;
@@ -629,7 +630,7 @@ class Game {
         }
 
         // 檢查是否出界
-        const groundY = this.canvas.height - 50;
+        const groundY = this.canvas.height - 20;
         if (this.projectile.y > groundY ||
             this.projectile.x < -100 ||
             this.projectile.x > this.canvas.width + 100) {
@@ -958,20 +959,8 @@ class Game {
             ctx.fillRect(0, 0, w, h);
         }
 
-        // 繪製地面（半透明，與背景融合）
-        const groundY = h - 100;
-        ctx.fillStyle = 'rgba(45, 74, 45, 0.7)';
-        ctx.fillRect(0, groundY, w, 100);
-
-        // 繪製草地紋理
-        ctx.strokeStyle = '#4a7a4a';
-        ctx.lineWidth = 2;
-        for (let i = 0; i < w; i += 20) {
-            ctx.beginPath();
-            ctx.moveTo(i, groundY);
-            ctx.lineTo(i + 10, groundY - 15);
-            ctx.stroke();
-        }
+        // 地面位置（配合背景街道地面）
+        const groundY = h - 20;
 
         // 繪製中間圍牆
         this.drawWall();
@@ -1335,7 +1324,7 @@ class Game {
     getWallBounds() {
         const w = this.canvas.width;
         const h = this.canvas.height;
-        const groundY = h - 100;
+        const groundY = h - 20;
         const wallWidth = CONFIG.WALL.WIDTH;
         const wallHeight = groundY * CONFIG.WALL.HEIGHT_RATIO;
 
