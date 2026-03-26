@@ -605,8 +605,8 @@ class Game {
     updateProjectile() {
         if (!this.projectile.active) return;
 
-        // 套用重力（乘以速度係數）
-        this.projectile.vy += CONFIG.GRAVITY * CONFIG.PROJECTILE_SPEED;
+        // 套用重力（正常重力效果，產生明顯的下墜加速感）
+        this.projectile.vy += CONFIG.GRAVITY;
 
         // 更新位置（乘以速度係數，降低飛行動畫速度）
         this.projectile.x += this.projectile.vx * CONFIG.PROJECTILE_SPEED;
