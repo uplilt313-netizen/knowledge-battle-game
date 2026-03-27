@@ -72,7 +72,7 @@ const CONFIG = {
     },
 
     // 動畫
-    PROJECTILE_SIZE: 80,       // 投擲物大小（放大200%）
+    PROJECTILE_SIZE: 120,      // 投擲物大小（再放大50%）
     CHARACTER_SIZE: 224,       // 角色大小（再放大20%，原187）
     TRAJECTORY_DOTS: 25        // 軌跡預測點數（增加以顯示更長軌跡）
 };
