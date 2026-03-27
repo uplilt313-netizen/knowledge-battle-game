@@ -680,6 +680,9 @@ class Game {
         this.projectile.active = false;
         this.state = GameState.HIT;
 
+        // 立即重置攻擊者的道具狀態（結束超級賽亞人型態）
+        this.players[this.currentTurn].activeItem = null;
+
         // 在撞牆位置顯示爆炸效果
         this.addEffect(this.projectile.x, this.projectile.y, 'wall_hit');
 
@@ -724,8 +727,9 @@ class Game {
         // 檢查攻擊者是否有加倍傷害
         if (attacker.activeItem === 'double') {
             damage *= CONFIG.ITEMS.double.multiplier;
-            attacker.activeItem = null;
         }
+        // 立即重置道具狀態（結束超級賽亞人型態）
+        attacker.activeItem = null;
 
         // 檢查目標是否有護盾
         if (target.hasShield) {
@@ -760,6 +764,9 @@ class Game {
     handleMiss() {
         this.projectile.active = false;
         this.state = GameState.HIT;
+
+        // 立即重置攻擊者的道具狀態（結束超級賽亞人型態）
+        this.players[this.currentTurn].activeItem = null;
 
         document.getElementById('turn-indicator').textContent = '💨 沒有命中...';
 
@@ -1323,8 +1330,9 @@ class Game {
             // 攻擊狀態：放大 20%
             scale = 1.2;
         } else if (isSuper) {
-            // 超級賽亞人狀態：放大 25%
+            // 超級賽亞人狀態：放大 25%，並調整 Y 軸讓角色站穩
             scale = 1.25;
+            offsetY = size * 0.1;  // 向下偏移補償放大效果
         }
 
         // 翻轉玩家2的角色（面向左邊）
